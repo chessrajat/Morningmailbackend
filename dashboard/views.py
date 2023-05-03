@@ -6,12 +6,14 @@ from django.shortcuts import render
 from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics
 
 from django.views.decorators.csrf import csrf_exempt
 
 from dashboard.tasks import send_emails
 from dashboard.models import SentEmail
+from dashboard.serializers import SubscriberSerializer
+from dashboard.models import Subscriber
 
 
 class SendMails(APIView):
@@ -33,7 +35,7 @@ class DailyEmailStatsView(APIView):
             print("here")
             days = 7
         today = timezone.now().date()
-        start_date = today - timedelta(days=days-2)
+        start_date = today - timedelta(days=days-1)
         response_data = []
         for i in range(days):
             date = start_date + timedelta(days=i)
@@ -50,7 +52,15 @@ class DailyEmailStatsView(APIView):
         return Response(response_data)
 
 
-@csrf_exempt
+class SubscriberStatsView(generics.ListAPIView):
+    serializer_class = SubscriberSerializer
+
+    def get_queryset(self):
+        queryset = Subscriber.objects.all()
+        return queryset
+
+
+@ csrf_exempt
 def track_email(request, tracking_id):
     PIXEL_DATA = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mOUdOjBfQADvwGU0LY+5wAAAABJRU5ErkJggg=='
     try:

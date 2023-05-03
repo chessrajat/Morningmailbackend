@@ -9,7 +9,7 @@ class Subscriber(models.Model):
 
 
 class SentEmail(models.Model):
-    recipient = models.ForeignKey(Subscriber, on_delete=models.CASCADE)
+    recipient = models.ForeignKey(Subscriber, on_delete=models.CASCADE, related_name="sent_emails")
     sent_at = models.DateTimeField(auto_now_add=True)
     is_successful = models.BooleanField(default=False)
     is_opened = models.BooleanField(default=False)
