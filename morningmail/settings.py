@@ -2,6 +2,8 @@ from datetime import timedelta
 from pathlib import Path
 from decouple import config, Csv
 import os
+import sys
+from dj_database_url import parse as db_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -72,12 +74,23 @@ WSGI_APPLICATION = 'morningmail.wsgi.application'
 
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DEVELOPMENT_MODE is True:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'postgres',
+            'USER': 'postgres',
+            'PASSWORD': 'postgres',
+            'HOST': 'db',
+            'PORT': '5432',
+        }
     }
-}
+elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
+    if config("DATABASE_URL", default=None) is None:
+        raise ValueError("DATABASE_URL environment variable not defined")
+    DATABASES = {
+        "default": config("DATABASE_URL", cast=db_url),
+    }
 
 
 # Password validation
